@@ -149,9 +149,9 @@ namespace AllLifeDataCollector
                 WriteTolog("strSQLServerItemName: " + strSQLServerItemName, 0);
                 WriteTolog("strTimerInterval: " + strTimerInterval, 0);
 
-                string strSqlMonitoring = ("user id=" + strSQLServerUsername + ";" +
+                string strSqlMonitoring = ("user id=" + strSQLServerMonitoringUsername + ";" +
                                 "password=" + strSQLServerMonitoringPassword + ";server=" + strSQLServerMonitoringItemName + ";" +
-                                "Trusted_Connection=yes;" +
+                                //"Trusted_Connection=yes;" +
                                 "database=" + strSQLServerMonitoringDBName + ";" +
                                 "connection timeout=30");
                 WriteTolog("strSql: " + strSqlMonitoring, 0);
@@ -169,6 +169,7 @@ namespace AllLifeDataCollector
                 #region "Get Reporitories"
                 //Get Repository info
                 strCmdMonitoring = "SELECT RepositoryID,RepositoryType,RepositoryName,RepositoryServerName,RepositoryUsername,RepositoryPassword,RepositoryDBName FROM tbl_ServiceRepositories";
+                WriteTolog("SQL:" + strCmdMonitoring, 0);
                 myCommandMonitoring = new SqlCommand(strCmdMonitoring, SQLConnectionMonitoring);
                 SqlDataReader readerMonitoring = myCommandMonitoring.ExecuteReader();
                 if (readerMonitoring.HasRows)
@@ -207,7 +208,7 @@ namespace AllLifeDataCollector
                 readerMonitoring.Close();
                 readerMonitoring.Dispose();
 
-                WriteTolog("Number of reporitories: " + Repositories.Count.ToString(), 0);
+                WriteTolog("Number of repositories: " + Repositories.Count.ToString(), 0);
                 intItemsProcessed = 0;
 
                 foreach (Repository RepositoryItem in Repositories)
@@ -523,6 +524,7 @@ namespace AllLifeDataCollector
                                         //Run the query to truncate the table
                                         if (strSpecialCondition == "ReplaceAll")
                                         {
+                                            #region "ReplaceAll"
                                             //if (strSpecialConditionColumnName.Contains("RunTime="))
                                             if (strRepopulateAtSpecificTime != "0")
                                             {                                                
@@ -574,6 +576,7 @@ namespace AllLifeDataCollector
                                                 SqlCommand myCommand = new SqlCommand(sql, SQLConnection1);
                                                 myCommand.ExecuteNonQuery();
                                             }
+                                            #endregion
                                         }
 
                                         sql = "SELECT * FROM " + strTableName;
@@ -582,6 +585,7 @@ namespace AllLifeDataCollector
                                         string strcolumnNames = string.Empty;
                                         string strcolumnName = string.Empty;
 
+                                        #region "DateDriven"
                                         for (int i = 0; i < ALColumnName.Count; i++)
                                         {
                                             //if (i == 0)
@@ -605,13 +609,15 @@ namespace AllLifeDataCollector
                                         }
                                         //sql = "SELECT " + strcolumnNames + " FROM " + strTableName + " WHERE " + strUniqueColumnName + " > '" + strLastTransaction + "' and " + strSpecialConditionColumnName + " is not null and " + strSpecialConditionColumnName + " > '" + strSpecialConditionID.ToString() + "' ORDER BY " + strSpecialConditionColumnName;
                                         sql = "SELECT " + strcolumnNames + " FROM " + strTableName + " WHERE " + strSpecialConditionColumnName + " is not null and to_char(" + strSpecialConditionColumnName + ", 'YYYY-MM-DD HH24:MI:SS') > '" + strSpecialConditionID.ToString() + "' ORDER BY " + strSpecialConditionColumnName;
+                                        #endregion
                                         break;
                                     case "ReplaceRowsBasedOnDate":
                                         string strcolumnNames2 = string.Empty;
                                         string strcolumnName2 = string.Empty;
-
+                                        #region "ReplaceRowsBasedOnDate"
                                         if (strRepopulateAtSpecificTime != "0")
                                         {
+                                            #region "if (strRepopulateAtSpecificTime != 0)"
                                             //int intPos = strSpecialConditionColumnName.IndexOf("=");
                                             dtCurrentTime = System.DateTime.Now;
                                             //strTargetTime = strSpecialConditionColumnName.Substring(intPos + 1);
@@ -698,9 +704,11 @@ namespace AllLifeDataCollector
                                                 sql = "SELECT " + strcolumnNames2 + " FROM " + strTableName + " WHERE to_char(" + strSpecialConditionColumnName + ", 'YYYY-MM-DD HH24:MI:SS') > '" + strSpecialConditionID.ToString() + "' ORDER BY " + strSpecialConditionColumnName;
                                                 blnDoBulkInsert = false;
                                             }
+                                            #endregion
                                         }
                                         else
                                         {
+                                            #region "if (strRepopulateAtSpecificTime == 0)"
                                             for (int i = 0; i < ALColumnName.Count; i++)
                                             {
                                                 if (i != ALColumnName.Count)
@@ -728,7 +736,9 @@ namespace AllLifeDataCollector
                                             {
                                                 sql += " LIMIT " + strThrottle;
                                             }
+                                            #endregion
                                         }
+                                        #endregion
                                         break;
                                     default:
                                         break;
@@ -1189,7 +1199,7 @@ namespace AllLifeDataCollector
 
             string strSqlMonitoring = ("user id=" + strSQLServerMonitoringUsername + ";" +
                             "password=" + strSQLServerMonitoringPassword + ";server=" + strSQLServerMonitoringItemName + ";" +
-                            "Trusted_Connection=yes;" +
+                            //"Trusted_Connection=yes;" +
                             "database=" + strSQLServerMonitoringDBName + ";" +
                             "connection timeout=30");
             WriteTolog("strSql: " + strSqlMonitoring, 0);
